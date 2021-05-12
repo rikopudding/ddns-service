@@ -21,21 +21,20 @@ type CloudflareConfig struct {
 	Host    string
 }
 
-type DnspodConfig struct {
+type DNSpodConfig struct {
 }
 
-func Init() {
+func Init()  {
 	viper.SetConfigName("config")
 	viper.SetConfigType("yaml")
+	viper.AddConfigPath("$HOME/.ddns-service/")
 	viper.AddConfigPath(".")
 
-	err := viper.ReadInConfig()
 	if err := viper.ReadInConfig(); err != nil {
-		panic(fmt.Errorf("Fatal error config file: %s \n", err))
+		panic(fmt.Errorf("fatal error config file: %s", err.Error()))
 	}
 
-	err = viper.Unmarshal(&Section)
-	if err != nil {
-		panic(fmt.Errorf("Fatal error config file: %s \n", err))
+	if err := viper.Unmarshal(&Section);err!=nil{
+		panic(fmt.Errorf("fatal error config file: %s", err.Error()))
 	}
 }
