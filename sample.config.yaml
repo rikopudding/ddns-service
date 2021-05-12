@@ -1,0 +1,14 @@
+ipGetter:
+  - https://ipinfo.io  
+  - https://api.ip.sb/ip
+  - https://myip.ipip.net 
+dnsApi:
+  cloudflare:
+    - authKey: authkey
+      zone: zone
+      email: email
+      host: example.host.com
+    - authKey: authkey
+      zone: zone
+      email: email
+      host: example2.host.com
