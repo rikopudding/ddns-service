@@ -6,4 +6,5 @@ A simple ddns service.
 - [x] Cloudflare
 - [ ] Godaddy
 - [ ] DNSPod
+
 ...
