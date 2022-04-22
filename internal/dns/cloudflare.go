@@ -60,6 +60,7 @@ func (cf *CloudflareInstance) Init() (err error) {
 	url := fmt.Sprintf("https://api.cloudflare.com/client/v4/zones/%s/dns_records?type=A&name=%s", cf.Cfg.Zone, cf.Cfg.Host)
 	body, err := httpclient.Get(url, cf.headers)
 
+
 	var respData CFGetDNSListResp
 	err = json.Unmarshal(body, &respData)
 	if err != nil {
@@ -92,6 +93,7 @@ func (cf *CloudflareInstance) SetIP(ip string) error {
 	if cf.CurrentIp == "" {
 		url := fmt.Sprintf("https://api.cloudflare.com/client/v4/zones/%s/dns_records", cf.Cfg.Zone)
 		body, err := httpclient.PostJson(url, cf.headers, reqBodyJson)
+		fmt.Sprintln(string(body))
 		if err != nil {
 			return err
 		}
@@ -115,6 +117,9 @@ func (cf *CloudflareInstance) SetIP(ip string) error {
 		err = json.Unmarshal(body, &respBody)
 		if err != nil {
 			return err
+		}
+		if len(respBody.Result)==0{
+			return nil
 		}
 		if respBody.Result[0].ID != "" {
 			cf.updateCFID(respBody.Result[0].ID)

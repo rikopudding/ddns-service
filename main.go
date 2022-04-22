@@ -15,7 +15,7 @@ func init() {
 }
 
 func main() {
-	service.Start()
+	go service.Start()
 	signalHandler()
 }
 

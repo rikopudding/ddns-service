@@ -16,7 +16,11 @@ func GetIp() string {
 		}
 		r := regexp.MustCompile(`((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})(\.((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})){3}`)
 		find := r.Find(body)
-		return string(find)
+		ip := string(find)
+		if ip == "127.0.0.1" {
+			continue
+		}
+		return ip
 	}
 	return ""
 }

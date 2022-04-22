@@ -50,12 +50,14 @@ func Request(method, url string, headers map[string]string, reqBody []byte) (res
 	}
 
 	resp, err := client.Do(req)
+	
 	if err != nil {
 		return
 	}
 	defer resp.Body.Close()
 
 	respBody, err = ioutil.ReadAll(resp.Body)
+
 	if err != nil {
 		return
 	}
