@@ -11,6 +11,7 @@ type ConfigSection struct {
 	IPGetter []string
 	DnsApi   struct {
 		Cloudflare []*CloudflareConfig
+		Dnspod     []*DNSpodConfig
 	}
 }
 
@@ -22,9 +23,13 @@ type CloudflareConfig struct {
 }
 
 type DNSpodConfig struct {
+	SecretId  string
+	SecretKey string
+	Domain    string
+	SubDomain string
 }
 
-func Init()  {
+func Init() {
 	viper.SetConfigName("config")
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath("$HOME/.ddns-service/")
@@ -34,7 +39,7 @@ func Init()  {
 		panic(fmt.Errorf("fatal error config file: %s", err.Error()))
 	}
 
-	if err := viper.Unmarshal(&Section);err!=nil{
+	if err := viper.Unmarshal(&Section); err != nil {
 		panic(fmt.Errorf("fatal error config file: %s", err.Error()))
 	}
 }

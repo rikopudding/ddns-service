@@ -7,6 +7,7 @@ import (
 )
 
 type CloudflareInstance struct {
+	Name      string
 	Cfg       *CloudflareConfig
 	headers   map[string]string
 	CfID      string
@@ -25,6 +26,7 @@ func NewCloudflare(email, zone, authKey, host string) *CloudflareInstance {
 	headers["X-Auth-Email"] = email
 	headers["X-Auth-Key"] = authKey
 	return &CloudflareInstance{
+		Name: "cloudflare",
 		Cfg: &CloudflareConfig{
 			Email:   email,
 			Zone:    zone,
@@ -55,12 +57,21 @@ type CFCreateOrUpdateParams struct {
 	TTL     int    `json:"ttl"`
 }
 
+func (cf *CloudflareInstance) GetName() string {
+	return cf.Name
+}
+
+func (cf *CloudflareInstance) GetFullDomain() string {
+	return cf.Cfg.Host
+}
+
 func (cf *CloudflareInstance) Init() (err error) {
 
 	url := fmt.Sprintf("https://api.cloudflare.com/client/v4/zones/%s/dns_records?type=A&name=%s", cf.Cfg.Zone, cf.Cfg.Host)
 	body, err := httpclient.Get(url, cf.headers)
-
-
+	if err != nil {
+		return
+	}
 	var respData CFGetDNSListResp
 	err = json.Unmarshal(body, &respData)
 	if err != nil {
@@ -93,7 +104,7 @@ func (cf *CloudflareInstance) SetIP(ip string) error {
 	if cf.CurrentIp == "" {
 		url := fmt.Sprintf("https://api.cloudflare.com/client/v4/zones/%s/dns_records", cf.Cfg.Zone)
 		body, err := httpclient.PostJson(url, cf.headers, reqBodyJson)
-		fmt.Sprintln(string(body))
+		// fmt.Println("add " + string(body))
 		if err != nil {
 			return err
 		}
@@ -106,26 +117,24 @@ func (cf *CloudflareInstance) SetIP(ip string) error {
 			cf.updateCFID(respBody.Result.ID)
 			cf.updateCurrentIP(respBody.Result.Content)
 		}
-		
+
 	} else {
 		url := fmt.Sprintf("https://api.cloudflare.com/client/v4/zones/%s/dns_records/%s", cf.Cfg.Zone, cf.CfID)
 		body, err := httpclient.PutJson(url, cf.headers, reqBodyJson)
 		if err != nil {
 			return err
 		}
-		var respBody CFGetDNSListResp
+		// fmt.Println("update " + string(body))
+		var respBody CFPostDNSResp
 		err = json.Unmarshal(body, &respBody)
 		if err != nil {
 			return err
 		}
-		if len(respBody.Result)==0{
-			return nil
+		if respBody.Result.ID != "" {
+			cf.updateCFID(respBody.Result.ID)
+			cf.updateCurrentIP(respBody.Result.Content)
 		}
-		if respBody.Result[0].ID != "" {
-			cf.updateCFID(respBody.Result[0].ID)
-			cf.updateCurrentIP(respBody.Result[0].ID)
-		}
-		
+
 	}
 
 	return nil
@@ -136,4 +145,8 @@ func (cf *CloudflareInstance) updateCurrentIP(ip string) {
 
 func (cf *CloudflareInstance) updateCFID(cfId string) {
 	cf.CfID = cfId
+}
+
+func (cf *CloudflareInstance) GetCachedIP() string {
+	return cf.CurrentIp
 }

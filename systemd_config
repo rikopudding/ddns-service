@@ -1,0 +1,20 @@
+# 上一次占用内存  6.6M
+
+[Unit]
+Description=ddns-service
+After=network.target
+#Before=xxx.service
+
+[Service]
+Type=simple
+User=root
+Group=root
+KillMode=control-group
+Restart=always
+RestartSec=30
+PIDFile=/var/run/ddns/ddns.pid
+ExecStart=/usr/bin/ddns-service
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

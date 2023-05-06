@@ -3,6 +3,7 @@ package service
 import (
 	"ddns-service/internal/dns"
 	ipgetter "ddns-service/internal/ip-getter"
+	"fmt"
 	"log"
 
 	"github.com/robfig/cron/v3"
@@ -22,13 +23,16 @@ func Start() {
 
 func getAndSet() {
 	ip := ipgetter.GetIp()
-	log.Println("currentIp: ", ip)
+	// log.Println("currentIp: ", ip)
 	if ip == "" {
 		return
 	}
 
 	for _, instance := range dns.Instances {
-		if !instance.Compare(ip) {
+		oldIP := instance.GetCachedIP()
+		if !instance.Compare(ip) || oldIP == "" {
+			fmt.Println(instance.GetName() + " domain:" + instance.GetFullDomain())
+			fmt.Println("old " + oldIP + ", new " + ip + " --- CreateOrUpdate START")
 			var retryCount = 0
 			for {
 				if retryCount == 3 {
@@ -41,6 +45,7 @@ func getAndSet() {
 				log.Println("dns record update failed: " + err.Error())
 				retryCount++
 			}
+			fmt.Println("old " + oldIP + ", new " + ip + " --- CreateOrUpdate END")
 		}
 	}
 }
